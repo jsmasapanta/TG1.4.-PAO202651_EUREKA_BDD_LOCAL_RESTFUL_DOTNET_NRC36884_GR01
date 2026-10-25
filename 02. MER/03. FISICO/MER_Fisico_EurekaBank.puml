@@ -1,0 +1,135 @@
+@startuml MER_Fisico_EurekaBank
+!include ../_estilo.iuml
+title Modelo físico — base EUREKABANK (SQL Server)
+hide circle
+skinparam linetype ortho
+
+entity "Moneda" as moneda {
+  * chr_monecodigo : CHAR(2) <<PK>>
+  --
+  vch_monedescripcion : VARCHAR(20)
+}
+
+entity "Sucursal" as sucursal {
+  * chr_sucucodigo : CHAR(3) <<PK>>
+  --
+  vch_sucunombre : VARCHAR(50)
+  vch_sucuciudad : VARCHAR(30)
+  vch_sucudireccion : VARCHAR(50)
+  int_sucucontcuenta : INT
+}
+
+entity "Empleado" as empleado {
+  * chr_emplcodigo : CHAR(4) <<PK>>
+  --
+  vch_emplpaterno : VARCHAR(25)
+  vch_emplmaterno : VARCHAR(25)
+  vch_emplnombre : VARCHAR(30)
+  vch_emplciudad : VARCHAR(30)
+  vch_empldireccion : VARCHAR(50)
+  vch_emplusuario : VARCHAR(15) <<UQ>>
+  vch_emplclave : VARCHAR(15)
+}
+
+entity "Asignado" as asignado {
+  * chr_asigcodigo : CHAR(6) <<PK>>
+  --
+  chr_sucucodigo : CHAR(3) <<FK>>
+  chr_emplcodigo : CHAR(4) <<FK>>
+  dtt_asigfechaalta : DATETIME
+  dtt_asigfechabaja : DATETIME
+}
+
+entity "Cliente" as cliente {
+  * chr_cliecodigo : CHAR(5) <<PK>>
+  --
+  vch_cliepaterno : VARCHAR(25)
+  vch_cliematerno : VARCHAR(25)
+  vch_clienombre : VARCHAR(30)
+  chr_cliedni : CHAR(8)
+  vch_clieciudad : VARCHAR(30)
+  vch_cliedireccion : VARCHAR(50)
+  vch_clietelefono : VARCHAR(20)
+  vch_clieemail : VARCHAR(50)
+}
+
+entity "Cuenta" as cuenta {
+  * chr_cuencodigo : CHAR(8) <<PK>>
+  --
+  chr_monecodigo : CHAR(2) <<FK>>
+  chr_sucucodigo : CHAR(3) <<FK>>
+  chr_emplcreacuenta : CHAR(4) <<FK>>
+  chr_cliecodigo : CHAR(5) <<FK>>
+  dec_cuensaldo : MONEY
+  dtt_cuenfechacreacion : DATETIME
+  vch_cuenestado : VARCHAR(15)
+  int_cuencontmov : INT
+  chr_cuenclave : CHAR(6)
+}
+
+entity "TipoMovimiento" as tipo {
+  * chr_tipocodigo : CHAR(3) <<PK>>
+  --
+  vch_tipodescripcion : VARCHAR(40)
+  vch_tipoaccion : VARCHAR(10)
+  vch_tipoestado : VARCHAR(15)
+}
+
+entity "Movimiento" as movimiento {
+  * chr_cuencodigo : CHAR(8) <<PK, FK>>
+  * int_movinumero : INT <<PK>>
+  --
+  dtt_movifecha : DATETIME
+  chr_emplcodigo : CHAR(4) <<FK>>
+  chr_tipocodigo : CHAR(3) <<FK>>
+  dec_moviimporte : MONEY
+  chr_cuenreferencia : CHAR(8)
+}
+
+entity "Parametro" as parametro {
+  * chr_paracodigo : CHAR(3) <<PK>>
+  --
+  vch_paradescripcion : VARCHAR(50)
+  vch_paravalor : VARCHAR(70)
+  vch_paraestado : VARCHAR(15)
+}
+
+entity "InteresMensual" as interes {
+  * chr_monecodigo : CHAR(2) <<PK, FK>>
+  --
+  dec_inteimporte : DECIMAL(12,2)
+}
+
+entity "CostoMovimiento" as costo {
+  * chr_monecodigo : CHAR(2) <<PK, FK>>
+  --
+  dec_costimporte : MONEY
+}
+
+entity "CargoMantenimiento" as cargo {
+  * chr_monecodigo : CHAR(2) <<PK, FK>>
+  --
+  dec_cargMontoMaximo : MONEY
+  dec_cargImporte : MONEY
+}
+
+entity "Contador" as contador {
+  * vch_conttabla : VARCHAR(30) <<PK>>
+  --
+  int_contitem : INT
+  int_contlongitud : INT
+}
+
+cliente ||--o{ cuenta
+moneda ||--o{ cuenta
+sucursal ||--o{ cuenta
+empleado ||--o{ cuenta : crea
+cuenta ||--o{ movimiento
+tipo ||--o{ movimiento
+empleado ||--o{ movimiento : registra
+empleado ||--o{ asignado
+sucursal ||--o{ asignado
+moneda ||--|| interes
+moneda ||--|| costo
+moneda ||--|| cargo
+@enduml

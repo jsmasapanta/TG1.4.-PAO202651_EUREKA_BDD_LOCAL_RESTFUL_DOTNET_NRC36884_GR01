@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ec.edu.monster.vista.MovimientosPage"
+             Title="Movimientos"
+             BackgroundColor="{StaticResource Fondo}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <Border Padding="16" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Número de cuenta" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
+                    <Entry x:Name="TxtCuenta" Keyboard="Numeric" MaxLength="8" Placeholder="Ej.: 00100001"
+                           ReturnType="Search" Completed="OnConsultarClicked" />
+                    <Button x:Name="BtnConsultar" Text="CONSULTAR" Clicked="OnConsultarClicked"
+                            BackgroundColor="#0D6EFD" TextColor="White" FontAttributes="Bold" HeightRequest="48" />
+                    <ActivityIndicator x:Name="Cargando" IsRunning="False" IsVisible="False" Color="#0D6EFD" />
+                    <Label x:Name="LblError" IsVisible="False" TextColor="{StaticResource Error}" FontSize="14" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Datos de la cuenta -->
+            <Border x:Name="TarjetaCuenta" IsVisible="False" Padding="16" BackgroundColor="White"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 14">
+                <VerticalStackLayout Spacing="4">
+                    <Label x:Name="LblCliente" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
+                    <Label x:Name="LblDetalle" FontSize="13" TextColor="{StaticResource TextoSuave}" />
+                    <Label Text="SALDO" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource TextoSuave}" Margin="0,8,0,0" />
+                    <Label x:Name="LblSaldo" FontSize="30" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label x:Name="LblTituloLista" IsVisible="False" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
+            <VerticalStackLayout x:Name="ListaMovimientos" Spacing="8" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

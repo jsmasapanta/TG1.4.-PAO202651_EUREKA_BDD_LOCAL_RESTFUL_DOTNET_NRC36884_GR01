@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API REST EurekaBank</title>
+    <style>
+        body { font-family: Segoe UI, Arial, sans-serif; margin: 0; background: #f2f5f9; color: #1d2733; }
+        header { background: #0b4f8a; color: #fff; padding: 18px 24px; }
+        header h1 { margin: 0; font-size: 22px; }
+        header p { margin: 4px 0 0; color: #d6e6f5; }
+        main { max-width: 980px; margin: 0 auto; padding: 16px; }
+        .op { background: #fff; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+        .op h2 { margin: 0 0 6px; font-size: 16px; }
+        .verbo { display: inline-block; min-width: 46px; text-align: center; padding: 2px 6px; border-radius: 4px; color: #fff; font-size: 12px; margin-right: 6px; }
+        .GET { background: #2e7d32; } .POST { background: #c56a00; }
+        code { background: #eef2f7; padding: 1px 4px; border-radius: 3px; }
+        label { display: inline-block; margin: 6px 10px 0 0; font-size: 13px; }
+        input { padding: 5px 7px; border: 1px solid #b8c4d2; border-radius: 4px; width: 130px; }
+        button { margin-top: 8px; padding: 6px 14px; border: 0; border-radius: 4px; background: #0b4f8a; color: #fff; cursor: pointer; }
+        pre { background: #10202f; color: #cfe3f7; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12.5px; margin: 8px 0 0; display: none; }
+        table { border-collapse: collapse; font-size: 13px; }
+        td, th { border: 1px solid #d4dce6; padding: 4px 8px; text-align: left; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>EurekaBank · API REST .NET + SQL Server</h1>
+    <p>ESPE · Arquitectura de Software · todas las respuestas son JSON</p>
+</header>
+<main>
+    <div class="op">
+        <h2>Errores</h2>
+        <table>
+            <tr><th>HTTP</th><th>codigo</th><th>Cuándo</th></tr>
+            <tr><td>400</td><td>VALOR_INVALIDO</td><td>Cuenta sin 8 dígitos, importe ≤ 0 o con más de 2 decimales, datos vacíos</td></tr>
+            <tr><td>401</td><td>REGLA_NEGOCIO</td><td>Login incorrecto (con los intentos restantes) o usuario bloqueado</td></tr>
+            <tr><td>409</td><td>REGLA_NEGOCIO</td><td>Cuenta inexistente o no activa, saldo insuficiente, monedas distintas</td></tr>
+            <tr><td>503</td><td>ERROR_BD</td><td>SQL Server apagado</td></tr>
+        </table>
+        <p>Cuerpo: <code>{ "codigo": "...", "mensaje": "..." }</code></p>
+    </div>
+
+    <div class="op">
+        <h2><span class="verbo POST">POST</span><code>api/eurekabank/login</code></h2>
+        Cuerpo <code>{ "usuario", "clave" }</code> → <code>{ codigo, usuario, nombre }</code>. Al tercer intento fallido el usuario queda bloqueado 2 minutos.<br />
+        <label>usuario <input id="l_usuario" value="monster" /></label>
+        <label>clave <input id="l_clave" type="password" /></label><br />
+        <button onclick="enviar('POST','api/eurekabank/login',{usuario:v('l_usuario'),clave:v('l_clave')},'r_login')">Probar</button>
+        <pre id="r_login"></pre>
+    </div>
+
+    <div class="op">
+        <h2><span class="verbo GET">GET</span><code>api/eurekabank/cuenta?numero=00100001</code></h2>
+        Datos de la cuenta con su cliente, moneda, sucursal y saldo.<br />
+        <label>numero <input id="c_numero" value="00100001" /></label><br />
+        <button onclick="enviar('GET','api/eurekabank/cuenta?numero='+encodeURIComponent(v('c_numero')),null,'r_cuenta')">Probar</button>
+        <pre id="r_cuenta"></pre>
+    </div>
+
+    <div class="op">
+        <h2><span class="verbo GET">GET</span><code>api/eurekabank/movimientos?cuenta=00100001</code></h2>
+        Movimientos de la cuenta, el más reciente primero.<br />
+        <label>cuenta <input id="m_cuenta" value="00100001" /></label><br />
+        <button onclick="enviar('GET','api/eurekabank/movimientos?cuenta='+encodeURIComponent(v('m_cuenta')),null,'r_mov')">Probar</button>
+        <pre id="r_mov"></pre>
+    </div>
+
+    <div class="op">
+        <h2><span class="verbo POST">POST</span><code>api/eurekabank/deposito</code> · <code>api/eurekabank/retiro</code></h2>
+        Cuerpo <code>{ "cuenta", "importe", "codEmpleado" }</code> → <code>{ cuenta, saldo }</code> (movimiento 003 o 004).<br />
+        <label>cuenta <input id="d_cuenta" value="00100001" /></label>
+        <label>importe <input id="d_importe" value="100.50" /></label>
+        <label>codEmpleado <input id="d_empleado" value="0012" /></label><br />
+        <button onclick="operacion('deposito')">Depósito</button>
+        <button onclick="operacion('retiro')">Retiro</button>
+        <pre id="r_dep"></pre>
+    </div>
+
+    <div class="op">
+        <h2><span class="verbo POST">POST</span><code>api/eurekabank/transferencia</code></h2>
+        Cuerpo <code>{ "cuentaOrigen", "cuentaDestino", "importe", "codEmpleado" }</code> → saldo del origen (009 en el origen y 008 en el destino).<br />
+        <label>cuentaOrigen <input id="t_origen" value="00100001" /></label>
+        <label>cuentaDestino <input id="t_destino" value="00200001" /></label>
+        <label>importe <input id="t_importe" value="100" /></label>
+        <label>codEmpleado <input id="t_empleado" value="0012" /></label><br />
+        <button onclick="enviar('POST','api/eurekabank/transferencia',{cuentaOrigen:v('t_origen'),cuentaDestino:v('t_destino'),importe:numero('t_importe'),codEmpleado:v('t_empleado')},'r_tra')">Probar</button>
+        <pre id="r_tra"></pre>
+    </div>
+</main>
+<script>
+    function v(id) { return document.getElementById(id).value; }
+    function numero(id) { var n = Number(v(id).replace(',', '.')); return isNaN(n) ? v(id) : n; }
+    function operacion(tipo) {
+        enviar('POST', 'api/eurekabank/' + tipo, { cuenta: v('d_cuenta'), importe: numero('d_importe'), codEmpleado: v('d_empleado') }, 'r_dep');
+    }
+    function enviar(verbo, ruta, cuerpo, salida) {
+        var pre = document.getElementById(salida);
+        pre.style.display = 'block';
+        pre.textContent = verbo + ' ' + ruta + ' ...';
+        var opciones = { method: verbo, headers: {} };
+        if (cuerpo) { opciones.headers['Content-Type'] = 'application/json'; opciones.body = JSON.stringify(cuerpo); }
+        fetch(ruta, opciones)
+            .then(function (r) { return r.text().then(function (t) { return { estado: r.status, texto: t }; }); })
+            .then(function (r) {
+                var json = r.texto;
+                try { json = JSON.stringify(JSON.parse(r.texto), null, 2); } catch (e) { }
+                pre.textContent = 'HTTP ' + r.estado + '\n' + json;
+            })
+            .catch(function (e) { pre.textContent = 'Error: ' + e.message; });
+    }
+</script>
+</body>
+</html>

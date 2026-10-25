@@ -1,0 +1,48 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<main class="login">
+    <section class="login-tarjeta">
+        <img class="login-imagen" src="~/img/monster.jpg" alt="Monsters Inc." asp-append-version="true" />
+
+        <div class="login-panel">
+            <header class="login-encabezado">
+                <span class="login-icono">$</span>
+                <div>
+                    <h1>EurekaBank</h1>
+                    <p>Cliente web · RESTFUL .NET + SQL Server</p>
+                </div>
+            </header>
+
+            <form asp-action="Login" method="post" class="login-form" autocomplete="off">
+                <label for="Usuario">Usuario</label>
+                <input id="Usuario" name="Usuario" value="@Model.Usuario" autofocus />
+
+                <label for="Clave">Clave</label>
+                <div class="campo-clave">
+                    <input id="Clave" name="Clave" type="password" />
+                    <button type="button" class="ver-clave" onclick="alternarClave()" title="Mostrar u ocultar la clave">Ver</button>
+                </div>
+
+                <button type="submit" class="boton boton-primario">INGRESAR</button>
+
+                @* Mensaje del servidor: clave incorrecta con intentos restantes, usuario bloqueado o falla de conexión. *@
+                @if (!string.IsNullOrEmpty(Model.Error))
+                {
+                    <p class="mensaje-error">@Model.Error</p>
+                }
+            </form>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+        function alternarClave() {
+            const campo = document.getElementById('Clave');
+            campo.type = campo.type === 'password' ? 'text' : 'password';
+        }
+    </script>
+}

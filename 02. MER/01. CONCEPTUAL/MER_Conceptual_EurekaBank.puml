@@ -1,0 +1,27 @@
+@startuml MER_Conceptual_EurekaBank
+!include ../_estilo.iuml
+title Modelo conceptual — EurekaBank
+hide circle
+hide members
+
+entity Cliente
+entity Cuenta
+entity Moneda
+entity Sucursal
+entity Empleado
+entity Movimiento
+entity TipoMovimiento
+entity Asignado
+entity "Parámetros por moneda\n(Interés, Costo, Cargo)" as Param
+
+Cliente "1" -- "0..*" Cuenta : posee
+Moneda "1" -- "0..*" Cuenta : expresa
+Sucursal "1" -- "0..*" Cuenta : abre
+Empleado "1" -- "0..*" Cuenta : crea
+Cuenta "1" -- "0..*" Movimiento : registra
+TipoMovimiento "1" -- "0..*" Movimiento : clasifica
+Empleado "1" -- "0..*" Movimiento : realiza
+Empleado "1" -- "0..*" Asignado
+Sucursal "1" -- "0..*" Asignado
+Moneda "1" -- "1" Param
+@enduml

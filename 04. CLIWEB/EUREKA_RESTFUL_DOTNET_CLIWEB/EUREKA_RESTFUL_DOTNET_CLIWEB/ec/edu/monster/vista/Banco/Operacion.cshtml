@@ -1,0 +1,88 @@
+@model OperacionViewModel
+@{
+    ViewData["Title"] = Formato.Titulo(Model.Tipo);
+    bool esTransferencia = Model.Tipo == TipoOperacion.Transferencia;
+    string ayuda = Model.Tipo switch
+    {
+        TipoOperacion.Deposito => "Suma el importe al saldo de la cuenta.",
+        TipoOperacion.Retiro => "Resta el importe del saldo; la cuenta debe tener saldo suficiente.",
+        _ => "Pasa el importe de una cuenta a otra de la misma moneda."
+    };
+}
+
+<div class="tema-@Model.Tipo.ToString().ToLowerInvariant()">
+    <h1 class="titulo">@Formato.Titulo(Model.Tipo)</h1>
+    <p class="ayuda">@ayuda</p>
+
+    <div class="columnas">
+        <section class="tarjeta">
+            <form asp-action="Registrar" method="post" autocomplete="off" onsubmit="return confirmar()">
+                <input type="hidden" name="Tipo" value="@Model.Tipo" />
+
+                <label for="Cuenta">@(esTransferencia ? "Cuenta de origen" : "Cuenta")</label>
+                <input id="Cuenta" name="Cuenta" value="@Model.Cuenta" inputmode="numeric" placeholder="Ej.: 00100001" autofocus />
+
+                @if (esTransferencia)
+                {
+                    <label for="CuentaDestino">Cuenta de destino</label>
+                    <input id="CuentaDestino" name="CuentaDestino" value="@Model.CuentaDestino" inputmode="numeric" placeholder="Ej.: 00200001" />
+                }
+
+                <label for="Importe">Importe</label>
+                <input id="Importe" name="Importe" value="@Model.Importe" inputmode="decimal" placeholder="Ej.: 150 o 75.50" />
+
+                <button type="submit" class="boton boton-color ancho">REGISTRAR @Formato.Titulo(Model.Tipo).ToUpperInvariant()</button>
+            </form>
+
+            <hr />
+
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="resultado error">
+                    <strong>No se pudo registrar</strong>
+                    <p>@Model.Error</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(Model.Exito))
+            {
+                <div class="resultado">
+                    <strong>@Model.Exito</strong>
+                    <p>@Model.Detalle</p>
+                </div>
+            }
+            else
+            {
+                <div class="resultado vacio"><strong>—</strong></div>
+            }
+        </section>
+
+        <aside class="historial">
+            <h2>Registradas en esta sesión</h2>
+            <ul>
+                @foreach (var linea in Model.Sesion)
+                {
+                    <li>@linea</li>
+                }
+                @if (Model.Sesion.Count == 0)
+                {
+                    <li class="vacio">Aún no hay operaciones.</li>
+                }
+            </ul>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const operacion = '@Formato.Titulo(Model.Tipo).ToLowerInvariant()';
+        function confirmar() {
+            const cuenta = document.getElementById('Cuenta').value.trim();
+            const destino = document.getElementById('CuentaDestino');
+            const importe = document.getElementById('Importe').value.trim();
+            const texto = destino
+                ? '¿Transferir ' + importe + ' de la cuenta ' + cuenta + ' a la cuenta ' + destino.value.trim() + '?'
+                : '¿Registrar ' + operacion + ' de ' + importe + ' en la cuenta ' + cuenta + '?';
+            return confirm(texto);
+        }
+    </script>
+}

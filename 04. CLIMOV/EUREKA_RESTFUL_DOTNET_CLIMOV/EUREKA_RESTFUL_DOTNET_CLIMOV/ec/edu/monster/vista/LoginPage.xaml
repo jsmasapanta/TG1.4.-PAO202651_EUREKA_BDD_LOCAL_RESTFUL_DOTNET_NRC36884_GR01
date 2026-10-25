@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ec.edu.monster.vista.LoginPage"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{StaticResource Fondo}">
+
+    <ScrollView>
+        <VerticalStackLayout>
+
+            <!-- Encabezado -->
+            <VerticalStackLayout BackgroundColor="{StaticResource Primary}" Padding="24,48,24,32" Spacing="6">
+                <Label Text="$ EurekaBank" FontSize="30" FontAttributes="Bold" TextColor="White" />
+                <Label Text="RESTFUL .NET + SQL Server" FontSize="16" TextColor="#D6E6F5" />
+                <Label Text="Movimientos · Depósito · Retiro · Transferencia" FontSize="13" TextColor="#A9C8E8" />
+            </VerticalStackLayout>
+
+            <!-- Imagen -->
+            <Image Source="monster.jpg" Aspect="AspectFill" HeightRequest="260" Margin="0,0,0,0" />
+
+            <!-- Formulario -->
+            <Border Margin="16,-24,16,16" Padding="20" BackgroundColor="White"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 14">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Opacity="0.12" Radius="12" Offset="0,4" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Iniciar sesión" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
+
+                    <Label Text="Usuario" FontAttributes="Bold" TextColor="{StaticResource Texto}" Margin="0,6,0,0" />
+                    <Entry x:Name="TxtUsuario" Placeholder="monster" ReturnType="Next" />
+
+                    <Label Text="Clave" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
+                    <Entry x:Name="TxtClave" IsPassword="True" Placeholder="••••••" ReturnType="Go"
+                           Completed="OnIngresarClicked" />
+
+                    <Label x:Name="LblError" IsVisible="False" TextColor="{StaticResource Error}" FontSize="14" />
+
+                    <Button x:Name="BtnIngresar" Text="INGRESAR" Clicked="OnIngresarClicked"
+                            BackgroundColor="{StaticResource Primary}" TextColor="White"
+                            FontAttributes="Bold" HeightRequest="50" Margin="0,6,0,0" />
+                    <ActivityIndicator x:Name="Cargando" IsRunning="False" IsVisible="False"
+                                       Color="{StaticResource Primary}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Configuración del servidor -->
+            <Border Margin="16,0,16,24" Padding="20" BackgroundColor="White"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Servidor REST" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
+                    <Entry x:Name="TxtUrl" Keyboard="Url" FontSize="14" />
+                    <Label FontSize="12" TextColor="{StaticResource TextoSuave}"
+                           Text="Celular real: http://IP-DE-LA-PC:8088 (misma red WiFi). Emulador: http://10.0.2.2:8088" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

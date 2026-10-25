@@ -1,0 +1,22 @@
+﻿# Compilación de Visual Studio / .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+packages/
+TestResults/
+
+# Android / Gradle / IDEs
+.gradle/
+build/
+.idea/
+local.properties
+
+# Node (generadores)
+node_modules/
+
+# Temporales de Office y Windows
+~$*
+*.tmp
+Thumbs.db

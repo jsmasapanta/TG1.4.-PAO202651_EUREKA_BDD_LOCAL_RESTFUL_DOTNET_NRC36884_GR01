@@ -1,0 +1,10 @@
+﻿<Project>
+  <!--
+    Android (aapt2) falla si la ruta de los archivos temporales supera 260 caracteres,
+    y la carpeta de entrega tiene una ruta muy larga. Por eso la compilación intermedia (obj)
+    se hace en una carpeta corta del usuario. No afecta al código.
+  -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(LOCALAPPDATA)\EUREKA_REST_CLIMOV\obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

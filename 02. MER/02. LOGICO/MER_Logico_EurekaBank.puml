@@ -1,0 +1,57 @@
+@startuml MER_Logico_EurekaBank
+!include ../_estilo.iuml
+title Modelo lógico — tablas que usa el API REST
+hide circle
+skinparam linetype ortho
+
+entity Cliente {
+  * codigo <<PK>>
+  --
+  nombre, paterno, materno, dni, ciudad, dirección
+}
+entity Moneda {
+  * codigo <<PK>>
+  --
+  descripción
+}
+entity Sucursal {
+  * codigo <<PK>>
+  --
+  nombre, ciudad
+}
+entity Empleado {
+  * codigo <<PK>>
+  --
+  nombre, usuario <<UQ>>, clave
+}
+entity Cuenta {
+  * codigo <<PK>>
+  --
+  # cliente <<FK>>
+  # moneda <<FK>>
+  # sucursal <<FK>>
+  # empleadoCrea <<FK>>
+  saldo, estado, fechaCreación, contadorMovimientos
+}
+entity TipoMovimiento {
+  * codigo <<PK>>
+  --
+  descripción, acción (INGRESO / SALIDA)
+}
+entity Movimiento {
+  * cuenta <<PK, FK>>
+  * número <<PK>>
+  --
+  # tipo <<FK>>
+  # empleado <<FK>>
+  fecha, importe, cuentaReferencia
+}
+
+Cliente ||--o{ Cuenta
+Moneda ||--o{ Cuenta
+Sucursal ||--o{ Cuenta
+Empleado ||--o{ Cuenta
+Cuenta ||--o{ Movimiento
+TipoMovimiento ||--o{ Movimiento
+Empleado ||--o{ Movimiento
+@enduml

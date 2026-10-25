@@ -1,0 +1,34 @@
+@startuml DArq_EurekaBank
+!include ../_estilo.iuml
+title Arquitectura — EurekaBank RESTful .NET con SQL Server
+
+node "PC integrante 1" {
+  component "CLICON\nconsola .NET 4.7.2" as CLICON
+  node "IIS / IIS Express :8088" {
+    component "api/eurekabank/*\n(ASP.NET Web API 2 · JSON)" as WS
+    component "EurekaServicio\n(lógica, transacciones)" as NEG
+    component "ConexionBD\n(Singleton)" as CON
+  }
+  database "SQL Server\nEUREKABANK\nlogin monster" as SQL
+}
+
+node "PC integrante 2" {
+  component "CLIESC\nWindows Forms" as CLIESC
+  component "CLIWEB\nASP.NET Core MVC :5088" as CLIWEB
+}
+
+node "Celular Android" {
+  component "CLIMOV\n.NET MAUI" as CLIMOV
+}
+
+actor Navegador
+
+CLICON --> WS : REST / JSON / HTTP
+CLIESC --> WS : REST / JSON (WiFi)
+CLIWEB --> WS : REST / JSON (WiFi)
+CLIMOV --> WS : REST / JSON (WiFi)
+Navegador --> CLIWEB : HTTP
+WS --> NEG
+NEG --> CON
+CON --> SQL : ADO.NET (System.Data.SqlClient)
+@enduml

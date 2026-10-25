@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7D32CD68-8144-4689-8057-0F106EA411A1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ec.edu.monster</RootNamespace>
+    <AssemblyName>EUREKA_RESTFUL_DOTNET_CLIESC</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ec\edu\monster\controlador\ControladorEureka.cs" />
+    <Compile Include="ec\edu\monster\modelo\Cuenta.cs" />
+    <Compile Include="ec\edu\monster\modelo\Empleado.cs" />
+    <Compile Include="ec\edu\monster\modelo\ErrorServicio.cs" />
+    <Compile Include="ec\edu\monster\modelo\Movimiento.cs" />
+    <Compile Include="ec\edu\monster\modelo\Solicitudes.cs" />
+    <Compile Include="ec\edu\monster\modelo\TipoOperacion.cs" />
+    <Compile Include="ec\edu\monster\servicio\ClienteEureka.cs" />
+    <Compile Include="ec\edu\monster\servicio\Json.cs" />
+    <Compile Include="ec\edu\monster\vista\FormLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ec\edu\monster\vista\FormPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ec\edu\monster\vista\PanelMovimientos.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ec\edu\monster\vista\PanelOperacion.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ec\edu\monster\vista\Formato.cs" />
+    <Compile Include="ec\edu\monster\vista\Tema.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Recursos\monster.jpg">
+      <LogicalName>monster.jpg</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

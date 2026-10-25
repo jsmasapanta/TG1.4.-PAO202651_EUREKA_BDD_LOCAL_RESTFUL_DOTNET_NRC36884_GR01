@@ -1,0 +1,267 @@
+/* Mismos colores que el cliente de escritorio. */
+:root {
+    --primario: #0b4f8a;
+    --primario-oscuro: #082e54;
+    --fondo: #f2f5f9;
+    --tarjeta: #ffffff;
+    --texto: #212529;
+    --texto-suave: #6c757d;
+    --borde: #dee2e6;
+    --error: #c0392b;
+    --consulta: #0d6efd;
+    --deposito: #198754;
+    --retiro: #c0392b;
+    --transferencia: #6f42c1;
+    --color: var(--primario);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    color: var(--texto);
+    background: var(--fondo);
+}
+
+input, select, button { font: inherit; }
+
+input, select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    background: #fff;
+}
+
+input:focus, select:focus {
+    outline: 2px solid var(--color);
+    outline-offset: -1px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin: 14px 0 6px;
+}
+
+.boton {
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 18px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.boton:hover { filter: brightness(0.92); }
+.boton:disabled { opacity: .5; cursor: not-allowed; }
+.boton-primario { background: var(--primario); width: 100%; margin-top: 20px; }
+.boton-color { background: var(--color); }
+.boton-salir { background: #a03228; width: 100%; }
+.ancho { width: 100%; margin-top: 20px; }
+
+/* ---------- Login ---------- */
+.login {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+
+.login-tarjeta {
+    width: 100%;
+    max-width: 840px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--tarjeta);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .08);
+}
+
+.login-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 30px 28px;
+    background: var(--primario);
+    color: #fff;
+}
+
+.login-encabezado h1 { margin: 0; font-size: 26px; }
+.login-encabezado p { margin: 4px 0 0; color: #c8def5; }
+.login-icono { font-size: 42px; font-weight: 700; }
+
+.login-form { padding: 10px 32px 28px; }
+.login-imagen { width: 100%; height: 100%; min-height: 420px; object-fit: cover; display: block; }
+.login-panel { display: flex; flex-direction: column; }
+
+.menu-imagen { width: calc(100% - 40px); margin: 18px 20px 0; border-radius: 8px; }
+
+.campo-clave { display: flex; gap: 8px; }
+.ver-clave {
+    border: 1px solid var(--borde);
+    background: #fff;
+    border-radius: 6px;
+    padding: 0 14px;
+    cursor: pointer;
+    color: var(--texto-suave);
+}
+
+.mensaje-error {
+    color: var(--error);
+    text-align: center;
+    margin: 16px 0 0;
+}
+.mensaje-error.izquierda { text-align: left; }
+
+/* ---------- Aplicación ---------- */
+.tema-consulta { --color: var(--consulta); }
+.tema-deposito { --color: var(--deposito); }
+.tema-retiro { --color: var(--retiro); }
+.tema-transferencia { --color: var(--transferencia); }
+
+.app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+.menu {
+    background: var(--primario-oscuro);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+}
+
+.marca { font-size: 22px; font-weight: 700; padding: 0 24px; }
+.usuario { color: #bed4ee; padding: 6px 24px 28px; line-height: 1.5; }
+
+.menu-item {
+    display: block;
+    padding: 14px 24px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.menu-item:hover { background: var(--primario); }
+.menu-item.activo.item-consulta { background: var(--consulta); }
+.menu-item.activo.item-deposito { background: var(--deposito); }
+.menu-item.activo.item-retiro { background: var(--retiro); }
+.menu-item.activo.item-transferencia { background: var(--transferencia); }
+.menu-simbolo { display: inline-block; width: 30px; }
+
+.salir { margin-top: auto; padding: 0 20px; }
+
+/* min-width: 0 evita que la tabla ancha estire la columna de la grilla en pantallas pequeñas. */
+.contenido { padding: 28px 36px; display: flex; flex-direction: column; min-width: 0; }
+
+.titulo { margin: 0; color: var(--color); font-size: 28px; }
+.ayuda { color: var(--texto-suave); margin: 6px 0 22px; }
+
+.fila-consulta { display: flex; gap: 14px; max-width: 520px; }
+.fila-consulta input { font-size: 18px; }
+
+.columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 24px;
+    align-items: start;
+}
+
+.tarjeta {
+    background: var(--tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    padding: 10px 24px 24px;
+}
+
+.tarjeta-cuenta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 22px 0 16px;
+    padding: 16px 24px;
+}
+.tarjeta-cuenta h2 { margin: 0 0 6px; font-size: 19px; }
+.tarjeta-cuenta p { margin: 0; color: var(--texto-suave); }
+.saldo { text-align: right; }
+.saldo span { display: block; font-size: 12px; font-weight: 700; color: var(--texto-suave); }
+.saldo strong { font-size: 28px; color: var(--primario); }
+
+.tabla-contenedor { overflow-x: auto; }
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--borde);
+    font-size: 14px;
+}
+.tabla th {
+    background: var(--primario);
+    color: #fff;
+    text-align: left;
+    padding: 9px 10px;
+}
+.tabla td { padding: 8px 10px; border-top: 1px solid #f1f3f5; white-space: nowrap; }
+.tabla tbody tr:hover { background: #f6f9fc; }
+.derecha { text-align: right !important; }
+.ingreso { color: var(--deposito); font-weight: 600; }
+.salida { color: var(--retiro); font-weight: 600; }
+.tabla td.vacio { color: var(--texto-suave); text-align: center; }
+
+hr { border: 0; border-top: 1px solid var(--borde); margin: 24px 0 16px; }
+
+.resultado { text-align: center; min-height: 80px; }
+.resultado strong { display: block; font-size: 24px; color: var(--color); }
+.resultado p { color: var(--texto-suave); margin: 8px 0 0; }
+.resultado.error strong { font-size: 18px; color: var(--error); }
+.resultado.error p { color: var(--error); }
+.resultado.vacio strong { color: var(--borde); }
+
+.historial h2 { font-size: 16px; margin: 0 0 10px; }
+.historial ul {
+    list-style: none;
+    margin: 0;
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    min-height: 260px;
+    font-size: 13px;
+}
+.historial li { padding: 5px 0; border-bottom: 1px solid #f1f3f5; }
+.historial li.vacio { color: var(--texto-suave); border: 0; }
+
+.estado {
+    margin-top: auto;
+    padding-top: 24px;
+    color: var(--texto-suave);
+    font-size: 13px;
+}
+
+/* ---------- Pantallas pequeñas (celular) ---------- */
+@media (max-width: 800px) {
+    .login-tarjeta { grid-template-columns: 1fr; max-width: 420px; }
+    .login-imagen { min-height: 0; max-height: 260px; }
+    .menu-imagen { display: none; }
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .tarjeta-cuenta h2 { font-size: 16px; }
+    .menu { padding: 14px 0; }
+    .menu nav { display: grid; grid-template-columns: 1fr 1fr; }
+    .menu-item { text-align: center; padding: 12px 6px; font-size: 14px; }
+    .menu-simbolo { width: auto; }
+    .usuario { padding-bottom: 12px; }
+    .salir { margin-top: 12px; }
+    .contenido { padding: 20px 16px; }
+    .columnas { grid-template-columns: 1fr; }
+    .fila-consulta { flex-direction: column; }
+    .tarjeta-cuenta { flex-direction: column; align-items: flex-start; }
+    .saldo { text-align: left; }
+}

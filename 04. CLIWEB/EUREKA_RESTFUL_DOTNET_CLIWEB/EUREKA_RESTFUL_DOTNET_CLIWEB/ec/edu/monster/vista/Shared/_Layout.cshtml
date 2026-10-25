@@ -1,0 +1,53 @@
+@{
+    // Las pantallas del banco ponen ViewData["Opcion"]; el login no, y se muestra sin menú.
+    string? opcion = ViewData["Opcion"] as string;
+    var menu = new[]
+    {
+        (Accion: "Movimientos", Texto: "Movimientos", Icono: "≡", Clase: "consulta"),
+        (Accion: "Deposito", Texto: "Depósito", Icono: "+", Clase: "deposito"),
+        (Accion: "Retiro", Texto: "Retiro", Icono: "−", Clase: "retiro"),
+        (Accion: "Transferencia", Texto: "Transferencia", Icono: "⇄", Clase: "transferencia")
+    };
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · EurekaBank</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (opcion == null)
+    {
+        @RenderBody()
+    }
+    else
+    {
+        <div class="app">
+            <aside class="menu">
+                <div class="marca">$ EurekaBank</div>
+                <div class="usuario">@ViewData["Nombre"]<br />Empleado @ViewData["Empleado"]</div>
+                <nav>
+                    @foreach (var item in menu)
+                    {
+                        <a asp-controller="Banco" asp-action="@item.Accion"
+                           class="menu-item item-@item.Clase @(item.Accion == opcion ? "activo" : "")">
+                            <span class="menu-simbolo">@item.Icono</span> @item.Texto
+                        </a>
+                    }
+                </nav>
+                <img class="menu-imagen" src="~/img/monster.jpg" alt="Monsters Inc." asp-append-version="true" />
+                <form asp-controller="Acceso" asp-action="Logout" method="post" class="salir">
+                    <button type="submit" class="boton boton-salir">Cerrar sesión</button>
+                </form>
+            </aside>
+            <main class="contenido">
+                @RenderBody()
+                <div class="estado">Conectado a: @ViewData["Servidor"]</div>
+            </main>
+        </div>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

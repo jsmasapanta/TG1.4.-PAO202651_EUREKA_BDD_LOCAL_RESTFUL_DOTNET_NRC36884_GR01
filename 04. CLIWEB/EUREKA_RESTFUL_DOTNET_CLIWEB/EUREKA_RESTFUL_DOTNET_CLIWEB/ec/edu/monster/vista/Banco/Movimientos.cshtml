@@ -1,0 +1,60 @@
+@model MovimientosViewModel
+@{
+    ViewData["Title"] = "Movimientos";
+}
+
+<div class="tema-consulta">
+    <h1 class="titulo">Movimientos de cuenta</h1>
+    <p class="ayuda">Escriba el número de cuenta (8 dígitos) y presione Consultar.</p>
+
+    <form asp-action="Movimientos" method="get" class="fila-consulta">
+        <input name="cuenta" value="@Model.Cuenta" inputmode="numeric" placeholder="Ej.: 00100001" autofocus autocomplete="off" />
+        <button type="submit" class="boton boton-color">CONSULTAR</button>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <p class="mensaje-error izquierda">@Model.Error</p>
+    }
+
+    @if (Model.Datos != null)
+    {
+        var c = Model.Datos;
+        <section class="tarjeta tarjeta-cuenta">
+            <div>
+                <h2>@c.Codigo · @c.Cliente</h2>
+                <p>Moneda: @c.Moneda · Sucursal: @c.Sucursal · Estado: @c.Estado · Creada: @c.FechaCreacion.ToString("dd/MM/yyyy")</p>
+            </div>
+            <div class="saldo">
+                <span>SALDO</span>
+                <strong>@Formato.Dinero(c.Saldo)</strong>
+            </div>
+        </section>
+
+        <div class="tabla-contenedor">
+            <table class="tabla">
+                <thead>
+                    <tr><th>Nro</th><th>Fecha</th><th>Tipo</th><th>Acción</th><th class="derecha">Importe</th><th>Empleado</th><th>Cuenta ref.</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Movimientos)
+                    {
+                        <tr>
+                            <td>@m.Numero</td>
+                            <td>@m.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@m.Tipo</td>
+                            <td>@m.Accion</td>
+                            <td class="derecha @(Formato.EsIngreso(m) ? "ingreso" : "salida")">@(Formato.EsIngreso(m) ? "+" : "−")@Formato.Dinero(m.Importe)</td>
+                            <td>@m.Empleado</td>
+                            <td>@m.CuentaReferencia</td>
+                        </tr>
+                    }
+                    @if (Model.Movimientos.Count == 0)
+                    {
+                        <tr><td colspan="7" class="vacio">La cuenta no tiene movimientos.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
