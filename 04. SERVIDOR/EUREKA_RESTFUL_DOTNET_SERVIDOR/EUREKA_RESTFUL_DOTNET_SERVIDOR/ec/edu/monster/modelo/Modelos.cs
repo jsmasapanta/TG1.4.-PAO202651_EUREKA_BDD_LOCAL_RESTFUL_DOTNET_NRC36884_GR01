@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ec.edu.monster.modelo
 {
@@ -19,6 +20,8 @@ namespace ec.edu.monster.modelo
         public string Codigo { get; set; }
         public string Usuario { get; set; }
         public string Nombre { get; set; }
+        /// <summary>Token de la sesión: los clientes lo envían en el header Authorization: Bearer de las demás operaciones.</summary>
+        public string Token { get; set; }
     }
 
     /// <summary>Datos de una cuenta con su cliente, moneda y sucursal (tablas Cuenta, Cliente, Moneda, Sucursal).</summary>
@@ -81,8 +84,46 @@ namespace ec.edu.monster.modelo
         public decimal Saldo { get; set; }
     }
 
+    /// <summary>Respuesta de POST api/eurekabank/logout.</summary>
+    public class ResultadoCierre
+    {
+        /// <summary>false si el token ya no existía (venció o se cerró antes).</summary>
+        public bool Cerrada { get; set; }
+    }
+
+    /// <summary>Respuesta de GET api/eurekabank/estado: métricas del monitor (sin claves, tokens ni montos) y sesiones vigentes.</summary>
+    public class EstadoServidor
+    {
+        public DateTime Inicio { get; set; }
+        public long SegundosActivo { get; set; }
+        public long TotalPeticiones { get; set; }
+        public long TotalExitosas { get; set; }
+        public int SesionesActivas { get; set; }
+        /// <summary>WEB, MOVIL, ESCRITORIO, CONSOLA, PANEL, OTRO.</summary>
+        public List<Conteo> PorCliente { get; set; }
+        /// <summary>Deposito, Retiro, Transferencia, Consulta, Movimientos.</summary>
+        public List<Conteo> PorOperacion { get; set; }
+        /// <summary>Últimos 60 eventos, el más reciente primero.</summary>
+        public List<EventoMonitor> Eventos { get; set; }
+    }
+
+    public class Conteo
+    {
+        public string Nombre { get; set; }
+        public int Cantidad { get; set; }
+    }
+
+    /// <summary>Una petición atendida: hora, cliente (X-Cliente), operación y si salió bien.</summary>
+    public class EventoMonitor
+    {
+        public DateTime Hora { get; set; }
+        public string Cliente { get; set; }
+        public string Operacion { get; set; }
+        public bool Exito { get; set; }
+    }
+
     /// <summary>
-    /// Cuerpo de las respuestas de error (400, 401, 409, 500, 503).
+    /// Cuerpo de las respuestas de error (400, 401, 409, 423, 500, 503).
     /// Los clientes muestran "mensaje" al usuario.
     /// </summary>
     public class ErrorServicio

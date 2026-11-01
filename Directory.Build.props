@@ -1,0 +1,10 @@
+<Project>
+  <!--
+    La carpeta de entrega tiene una ruta muy larga y Windows no acepta rutas de más de 260 caracteres:
+    los archivos temporales de compilación (obj) de cada proyecto se generan en una carpeta corta del usuario,
+    %LOCALAPPDATA%\EUREKA_REST\obj\<proyecto>. No afecta al código. El móvil tiene su propio Directory.Build.props.
+  -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(LOCALAPPDATA)\EUREKA_REST\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

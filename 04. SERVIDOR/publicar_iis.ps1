@@ -40,12 +40,13 @@ foreach ($c in $caracteristicas) {
     }
 }
 
-# 2. Copiar solo lo necesario para ejecutar: Global.asax, index.html, Web.config y bin\
+# 2. Copiar solo lo necesario para ejecutar: Global.asax, Web.config, el panel y bin\
 Paso "2/5  Copiando el servidor a $Destino..."
 New-Item -ItemType Directory -Force -Path $Destino, "$Destino\bin" | Out-Null
 Copy-Item (Join-Path $Proyecto 'Global.asax') $Destino -Force
-Copy-Item (Join-Path $Proyecto 'index.html') $Destino -Force
 Copy-Item (Join-Path $Proyecto 'Web.config') $Destino -Force
+# Panel del servidor con login y monitoreo en la raíz del sitio (http://IP:8088/)
+foreach ($f in 'index.html','panel.js','panel.css','monster.jpg') { Copy-Item (Join-Path $Proyecto $f) $Destino -Force }
 Copy-Item (Join-Path $Proyecto 'bin\*') "$Destino\bin" -Recurse -Force
 
 # 3. Grupo de aplicaciones (.NET CLR v4.0, integrada) y sitio en el puerto 8088
@@ -72,11 +73,12 @@ if (-not (Get-NetFirewallRule -DisplayName "EUREKA REST $Puerto" -ErrorAction Si
 Paso '5/5  Comprobando...'
 $ips = Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^(127|169)\.' -and $_.InterfaceAlias -match 'Wi-?Fi|Ethernet' }
 try {
-    $r = Invoke-WebRequest "http://localhost:$Puerto/api/eurekabank/cuenta?numero=00100001" -UseBasicParsing -TimeoutSec 30
-    Write-Host "   API OK (HTTP $($r.StatusCode)): $($r.Content)" -ForegroundColor Green
+    # GET estado no pide token (las operaciones del banco sí: sin token responden 401).
+    $r = Invoke-WebRequest "http://localhost:$Puerto/api/eurekabank/estado" -UseBasicParsing -TimeoutSec 30
+    Write-Host "   API OK (HTTP $($r.StatusCode))" -ForegroundColor Green
 } catch {
     Write-Host "   No respondió: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 Write-Host "`nListo. Los demás integrantes usan una de estas URL (la del adaptador Wi-Fi):" -ForegroundColor Green
-foreach ($ip in $ips) { Write-Host ("   {0,-12} http://{1}:{2}   (página de prueba del API en la misma dirección)" -f $ip.InterfaceAlias, $ip.IPAddress, $Puerto) }
+foreach ($ip in $ips) { Write-Host ("   {0,-12} http://{1}:{2}   (panel con login: http://{1}:{2}/ · API: /api/eurekabank/)" -f $ip.InterfaceAlias, $ip.IPAddress, $Puerto) }

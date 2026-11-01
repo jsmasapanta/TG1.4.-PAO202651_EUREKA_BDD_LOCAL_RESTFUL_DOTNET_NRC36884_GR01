@@ -18,6 +18,9 @@ namespace ec.edu.monster.ws
             json.ContractResolver = new CamelCasePropertyNamesContractResolver();
             json.Converters.Add(new IsoDateTimeConverter { DateTimeFormat = "yyyy-MM-ddTHH:mm:ss" });
 
+            // CORS para el panel y pruebas desde otra página (headers Authorization y X-Cliente).
+            config.MessageHandlers.Add(new PermitirOrigenes());
+
             // Los errores no controlados no muestran la pila de llamadas al cliente.
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Never;
         }

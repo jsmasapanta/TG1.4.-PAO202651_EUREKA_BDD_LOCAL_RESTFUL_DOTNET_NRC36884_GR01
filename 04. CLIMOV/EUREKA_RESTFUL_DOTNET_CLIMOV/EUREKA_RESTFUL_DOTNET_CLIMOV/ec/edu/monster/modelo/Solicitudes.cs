@@ -32,3 +32,9 @@ public class ResultadoOperacion
     public string Cuenta { get; set; } = "";
     public decimal Saldo { get; set; }
 }
+
+/// <summary>Respuesta de POST api/eurekabank/logout.</summary>
+public class ResultadoCierre
+{
+    public bool Cerrada { get; set; }
+}

@@ -38,4 +38,11 @@ namespace ec.edu.monster.modelo
         [DataMember(Name = "cuenta")] public string Cuenta { get; set; }
         [DataMember(Name = "saldo")] public decimal Saldo { get; set; }
     }
+
+    /// <summary>Respuesta de POST api/eurekabank/logout.</summary>
+    [DataContract]
+    public class ResultadoCierre
+    {
+        [DataMember(Name = "cerrada")] public bool Cerrada { get; set; }
+    }
 }

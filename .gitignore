@@ -20,3 +20,7 @@ node_modules/
 ~$*
 *.tmp
 Thumbs.db
+
+# Respaldos de PowerDesigner
+*.oob
+*.ebb

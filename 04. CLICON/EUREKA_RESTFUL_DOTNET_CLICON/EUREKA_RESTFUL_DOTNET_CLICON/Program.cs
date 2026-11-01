@@ -14,8 +14,8 @@ namespace ec.edu.monster
             }
             catch (Exception ex)
             {
-                // Por ejemplo, App.config sin el endpoint "WSEureka".
-                vista.MostrarError("Error inesperado: " + ex.Message);
+                // Por ejemplo, RestHost o RestPuerto inválidos en App.config.
+                vista.MostrarError(ex.Message);
                 vista.Pausa();
             }
         }

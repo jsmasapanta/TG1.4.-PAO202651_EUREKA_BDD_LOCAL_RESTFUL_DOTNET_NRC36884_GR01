@@ -14,6 +14,7 @@ public partial class OperacionPage : ContentPage
     public OperacionPage(TipoOperacion tipo)
     {
         InitializeComponent();
+        PermitirDecimales();
         _tipo = tipo;
         _color = Formato.ColorDe(tipo);
 
@@ -72,6 +73,7 @@ public partial class OperacionPage : ContentPage
             LblResultado.Text = $"{Title} registrad{(destino != null ? "a" : "o")}";
             LblDetalle.Text = $"Importe: {Formato.Dinero(importe.Value)}\nNuevo saldo de {cuenta}: {Formato.Dinero(saldo)}";
             TxtImporte.Text = "";
+            await MostrarComprobanteAsync(cuenta, destino, importe.Value, saldo);
         }
         catch (ErrorServicioException ex)
         {
@@ -82,6 +84,54 @@ public partial class OperacionPage : ContentPage
             Ocupado(false);
         }
     }
+
+    /// <summary>
+    /// Recibo de la operación. El número de movimiento y el titular se piden al servidor (consultarCuenta):
+    /// el movimiento recién grabado es el último de la cuenta. Si esa consulta falla, el recibo sale sin ellos.
+    /// </summary>
+    private async Task MostrarComprobanteAsync(string cuenta, string? destino, decimal importe, decimal saldo)
+    {
+        Cuenta? datos = null;
+        try
+        {
+            datos = await _controlador.ConsultarCuentaAsync(cuenta);
+        }
+        catch (ErrorServicioException)
+        {
+        }
+        string empleado = $"{_controlador.Empleado?.Codigo} · {_controlador.Empleado?.Nombre}";
+        await Navigation.PushModalAsync(new ComprobantePage(_tipo, cuenta, destino, datos, datos?.NumeroMovimientos ?? 0, importe, saldo, empleado));
+    }
+
+    /// <summary>
+    /// En Android el teclado numérico no deja escribir punto ni coma. Para el importe se aceptan los dos
+    /// separadores (75.50 o 75,50); Formato.LeerImporte los convierte.
+    /// El filtro de teclas va primero y luego SetRawInputType: así se muestra el teclado de números con decimales
+    /// sin que Android cambie el filtro por el de su idioma (que deja solo el punto).
+    /// Se agrega al final de los mapeos de MAUI que tocan el teclado; si no, MAUI vuelve a poner el suyo.
+    /// </summary>
+    private void PermitirDecimales()
+    {
+#if ANDROID
+        if (!_decimalesRegistrados)
+        {
+            _decimalesRegistrados = true;
+            foreach (string propiedad in new[] { nameof(Entry.Keyboard), nameof(Entry.IsReadOnly), nameof(Entry.IsPassword) })
+            {
+                Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(propiedad, (handler, vista) =>
+                {
+                    if (vista is Entry entrada && entrada.ClassId == "importe")
+                    {
+                        handler.PlatformView.KeyListener = Android.Text.Method.DigitsKeyListener.GetInstance("0123456789.,");
+                        handler.PlatformView.SetRawInputType(Android.Text.InputTypes.ClassNumber | Android.Text.InputTypes.NumberFlagDecimal);
+                    }
+                });
+            }
+        }
+#endif
+    }
+
+    private static bool _decimalesRegistrados;
 
     private void MostrarError(string mensaje)
     {

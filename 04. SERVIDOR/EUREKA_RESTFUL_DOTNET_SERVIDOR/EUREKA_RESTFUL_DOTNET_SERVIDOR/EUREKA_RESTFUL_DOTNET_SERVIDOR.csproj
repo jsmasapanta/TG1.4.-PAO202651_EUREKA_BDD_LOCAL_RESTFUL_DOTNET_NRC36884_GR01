@@ -60,6 +60,9 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="index.html" />
+    <Content Include="panel.js" />
+    <Content Include="panel.css" />
+    <Content Include="monster.jpg" />
     <Content Include="Web.config" />
     <Content Include="packages.config" />
   </ItemGroup>
@@ -67,7 +70,11 @@
     <Compile Include="ec\edu\monster\db\ConexionBD.cs" />
     <Compile Include="ec\edu\monster\modelo\Modelos.cs" />
     <Compile Include="ec\edu\monster\servicio\EurekaServicio.cs" />
+    <Compile Include="ec\edu\monster\servicio\GestorSesiones.cs" />
+    <Compile Include="ec\edu\monster\servicio\MonitorServidor.cs" />
+    <Compile Include="ec\edu\monster\ws\ContextoPeticion.cs" />
     <Compile Include="ec\edu\monster\ws\EurekabankController.cs" />
+    <Compile Include="ec\edu\monster\ws\PermitirOrigenes.cs" />
     <Compile Include="ec\edu\monster\ws\WebApiConfig.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

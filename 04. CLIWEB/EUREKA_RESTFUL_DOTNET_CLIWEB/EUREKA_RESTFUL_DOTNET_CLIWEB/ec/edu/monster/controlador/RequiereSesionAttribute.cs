@@ -11,10 +11,15 @@ public class RequiereSesionAttribute : ActionFilterAttribute
 {
     public const string ClaveEmpleado = "Empleado";
     public const string ClaveNombre = "NombreEmpleado";
+    /// <summary>Token que devolvió el login; nunca se muestra en las vistas.</summary>
+    public const string ClaveToken = "Token";
+    /// <summary>Hora (ticks) de la última respuesta del servidor; el token vence 30 minutos después.</summary>
+    public const string ClaveActividad = "UltimaActividad";
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        if (string.IsNullOrEmpty(context.HttpContext.Session.GetString(ClaveEmpleado)))
+        if (string.IsNullOrEmpty(context.HttpContext.Session.GetString(ClaveEmpleado))
+            || string.IsNullOrEmpty(context.HttpContext.Session.GetString(ClaveToken)))
         {
             context.Result = new RedirectToActionResult("Login", "Acceso", null);
         }

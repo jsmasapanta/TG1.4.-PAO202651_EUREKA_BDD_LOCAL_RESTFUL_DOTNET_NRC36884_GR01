@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -12,17 +13,17 @@ public class ErrorServicioException : Exception
 }
 
 /// <summary>
-/// Llama al API REST de EurekaBank con HttpClient: GET para consultar y POST con JSON para el login
-/// y las operaciones, y copia la respuesta en los modelos (get/set). Si el servidor responde un error
-/// (400, 401, 409, 503...), entrega su "mensaje". No tiene reglas del banco: todas las valida el servidor.
+/// Llama al API REST de EurekaBank con HttpClient: GET para consultar y POST con JSON para el login y las
+/// operaciones. Cada petición lleva el header X-Cliente y, después del login, Authorization: Bearer &lt;token&gt;.
+/// Copia la respuesta en los modelos (get/set); si el servidor responde un error (400, 401, 409, 423, 503...),
+/// entrega su "mensaje". No tiene reglas del banco: todas las valida el servidor.
 /// Patrón Singleton: toda la app usa ClienteRest.Instancia (un solo HttpClient).
 /// </summary>
 public sealed class ClienteRest
 {
-    private const string ClavePreferencia = "url_servidor_eureka_rest";
-
-    // IP de la PC con IIS en la red WiFi; en el emulador sería http://10.0.2.2:8088.
-    public const string UrlPorDefecto = "http://192.168.100.3:8088";
+    /// <summary>MOVIL en Android; ESCRITORIO si la app corre en Windows.</summary>
+    public static readonly string NombreCliente =
+        DeviceInfo.Current.Platform == DevicePlatform.WinUI ? "ESCRITORIO" : "MOVIL";
 
     // camelCase y sin distinguir mayúsculas, igual que el JSON del servidor.
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
@@ -33,22 +34,97 @@ public sealed class ClienteRest
 
     private readonly HttpClient _http;
 
+    /// <summary>Token de la sesión; nunca se muestra en pantalla.</summary>
+    private string? _token;
+
+    /// <summary>Última respuesta correcta del servidor: el token vence 30 minutos después.</summary>
+    private DateTime? _ultimaActividad;
+
+    /// <summary>Minutos que le quedan a la sesión (null si no hay sesión).</summary>
+    public int? MinutosSesion =>
+        _token == null || _ultimaActividad == null
+            ? null
+            : Math.Max(0, 30 - (int)(DateTime.Now - _ultimaActividad.Value).TotalMinutes);
+
+    /// <summary>
+    /// true si el servidor responde GET api/eurekabank/estado en 3 segundos (no pide token ni cuenta como petición).
+    /// Para el indicador "Servidor activo".
+    /// </summary>
+    public async Task<bool> ServidorActivoAsync()
+    {
+        if (!Uri.TryCreate(Url + "/api/eurekabank/estado", UriKind.Absolute, out Uri? destino))
+        {
+            return false;
+        }
+        try
+        {
+            using var espera = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            using HttpResponseMessage r = await _http.GetAsync(destino, espera.Token);
+            return r.IsSuccessStatusCode;
+        }
+        catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is SocketException || e is IOException)
+        {
+            return false;
+        }
+    }
+
     // Constructor privado: solo la propia clase crea la instancia.
     private ClienteRest()
     {
         _http = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
     }
 
-    /// <summary>URL base del API; se guarda en el teléfono para no escribirla cada vez.</summary>
+    private const string ClavePreferencia = "servidor_eureka_rest";
+
+    /// <summary>
+    /// URL base del API. Por defecto la de appsettings.json (incrustado en la app); si en el login se cambia
+    /// la IP o el puerto, la nueva se guarda en el teléfono y se usa hasta "Restablecer".
+    /// </summary>
     public string Url
     {
-        get => Preferences.Default.Get(ClavePreferencia, UrlPorDefecto);
-        set => Preferences.Default.Set(ClavePreferencia, value.Trim().TrimEnd('/'));
+        get => Preferences.Default.Get(ClavePreferencia, ConfiguracionServidor.Url);
+        set => Preferences.Default.Set(ClavePreferencia, value);
     }
 
-    /// <summary>POST api/eurekabank/login. Si falla, el servidor responde 401 con los intentos restantes o el bloqueo.</summary>
-    public Task<Empleado> LoginAsync(string usuario, string clave) =>
-        PostAsync<Empleado>("api/eurekabank/login", new SolicitudLogin { Usuario = usuario, Clave = clave });
+    /// <summary>Vuelve a la dirección de appsettings.json.</summary>
+    public void RestablecerServidor()
+    {
+        Preferences.Default.Remove(ClavePreferencia);
+        _token = null;
+        _ultimaActividad = null;
+    }
+
+    /// <summary>POST api/eurekabank/login. Si falla, el servidor responde 401 con los intentos restantes o 423 si está bloqueado.</summary>
+    public async Task<Empleado> LoginAsync(string usuario, string clave)
+    {
+        _token = null;
+        Empleado empleado = await PostAsync<Empleado>("api/eurekabank/login", new SolicitudLogin { Usuario = usuario, Clave = clave });
+        _token = empleado.Token;
+        _ultimaActividad = DateTime.Now;
+        return empleado;
+    }
+
+    /// <summary>POST api/eurekabank/logout: invalida el token en el servidor. Si no se puede avisar, igual se olvida aquí.</summary>
+    public async Task CerrarSesionAsync()
+    {
+        if (string.IsNullOrEmpty(_token))
+        {
+            return;
+        }
+        try
+        {
+            await PostAsync<ResultadoCierre>("api/eurekabank/logout", null);
+        }
+        catch (ErrorServicioException)
+        {
+            // El token vence solo a los 30 minutos.
+        }
+        finally
+        {
+            _token = null;
+            _ultimaActividad = null;
+        }
+    }
 
     public Task<Cuenta> ConsultarCuentaAsync(string cuenta) =>
         GetAsync<Cuenta>("api/eurekabank/cuenta?numero=" + Uri.EscapeDataString(cuenta));
@@ -71,23 +147,38 @@ public sealed class ClienteRest
     // ---------- HTTP ----------
 
     private Task<T> GetAsync<T>(string ruta) =>
-        EnviarAsync<T>(ruta, destino => _http.GetAsync(destino));
+        EnviarAsync<T>(ruta, () => new HttpRequestMessage(HttpMethod.Get, ""));
 
-    private Task<T> PostAsync<T>(string ruta, object cuerpo) =>
-        EnviarAsync<T>(ruta, destino => _http.PostAsync(destino, JsonContent.Create(cuerpo, cuerpo.GetType(), options: Json)));
+    private Task<T> PostAsync<T>(string ruta, object? cuerpo) =>
+        EnviarAsync<T>(ruta, () => new HttpRequestMessage(HttpMethod.Post, "")
+        {
+            Content = cuerpo == null ? new StringContent("") : JsonContent.Create(cuerpo, cuerpo.GetType(), options: Json)
+        });
 
-    private async Task<T> EnviarAsync<T>(string ruta, Func<Uri, Task<HttpResponseMessage>> peticion)
+    private async Task<T> EnviarAsync<T>(string ruta, Func<HttpRequestMessage> crear)
     {
         string url = Url;
-        if (!Uri.TryCreate(url + "/" + ruta, UriKind.Absolute, out Uri? destino))
+        if (string.IsNullOrWhiteSpace(url) && ConfiguracionServidor.Error != null)
+        {
+            throw new ErrorServicioException(ConfiguracionServidor.Error);
+        }
+        if (!Uri.TryCreate(url + "/" + ruta, UriKind.Absolute, out Uri? destino) || (destino.Scheme != Uri.UriSchemeHttp && destino.Scheme != Uri.UriSchemeHttps))
         {
             throw new ErrorServicioException($"La URL del servidor no es válida: {url}");
+        }
+
+        HttpRequestMessage peticion = crear();
+        peticion.RequestUri = destino;
+        peticion.Headers.Add("X-Cliente", NombreCliente);
+        if (!string.IsNullOrEmpty(_token))
+        {
+            peticion.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 
         HttpResponseMessage respuesta;
         try
         {
-            respuesta = await peticion(destino);
+            respuesta = await _http.SendAsync(peticion);
         }
         catch (TaskCanceledException)
         {
@@ -95,8 +186,7 @@ public sealed class ClienteRest
         }
         catch (Exception e) when (e is HttpRequestException || e is SocketException || e is IOException)
         {
-            throw new ErrorServicioException(
-                $"No se pudo conectar con el servidor en {url}. Verifique que esté encendido, la IP y que estén en la misma red WiFi.");
+            throw new ErrorServicioException($"No se pudo conectar a {url}. Verifica IP, puerto y red.");
         }
 
         using (respuesta)
@@ -106,6 +196,10 @@ public sealed class ClienteRest
             {
                 if (respuesta.IsSuccessStatusCode)
                 {
+                    if (_token != null)
+                    {
+                        _ultimaActividad = DateTime.Now;
+                    }
                     return JsonSerializer.Deserialize<T>(json, Json)!;
                 }
                 ErrorServicio? error = JsonSerializer.Deserialize<ErrorServicio>(json, Json);
@@ -118,7 +212,7 @@ public sealed class ClienteRest
             {
                 // El cuerpo no era el JSON esperado (por ejemplo, una página de error HTML).
             }
-            throw new ErrorServicioException($"Respuesta inesperada del servidor (HTTP {(int)respuesta.StatusCode}). Revise la URL: {url}");
+            throw new ErrorServicioException($"Respuesta inesperada del servidor (HTTP {(int)respuesta.StatusCode}). Verifica IP y puerto: {url}");
         }
     }
 }
